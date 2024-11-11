@@ -1,0 +1,53 @@
+﻿@model Article
+@using ScientificEdition.Data.Entities
+
+@{
+    ViewData["Title"] = "Редагування статті";
+}
+
+<div class="container mt-5">
+    <h2>Редагування статті</h2>
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Заголовок статті</label>
+            <input asp-for="Title" class="form-control" required />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label">Категорія статті</label>
+            <input asp-for="Category" class="form-control" required />
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Comment" class="form-label">Коментар</label>
+            <textarea asp-for="Comment" class="form-control wysiwyg-editor" required></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label">Статус статті</label>
+            <select asp-for="Status" class="form-select" required>
+                <option value="Draft" selected>Чернетка</option>
+                <option value="Published">Опублікована</option>
+                <option value="Archived">Архівована</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-success">Зберегти зміни</button>
+        <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/tinymce/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '.wysiwyg-editor',
+            menubar: false,
+            plugins: 'lists link image preview',
+            toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | link image | bullist numlist | preview',
+            height: 300,
+            branding: false,
+            content_style: "body { font-family: Arial, sans-serif; font-size: 14px; color: #333; }"
+        });
+    </script>
+}

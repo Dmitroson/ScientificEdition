@@ -6,10 +6,14 @@ namespace ScientificEdition.Data
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<ArticleVersion> ArticleVersions { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+
+        //public DbSet<PublicationJournal> PublicationJournals { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+            : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -24,6 +28,12 @@ namespace ScientificEdition.Data
                 .Property(x => x.LastName)
                 .HasMaxLength(50)
                 .IsRequired();
+
+            builder.Entity<Review>()
+                .HasOne(r => r.Reviewer)
+                .WithMany()
+                .HasForeignKey(r => r.ReviewerId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

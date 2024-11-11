@@ -1,0 +1,39 @@
+﻿@model Article
+@using ScientificEdition.Data
+@using ScientificEdition.Data.Entities
+
+@{
+    ViewData["Title"] = "Стаття";
+}
+
+<div class="container mt-5">
+    <h2>@Model.Title</h2>
+    <p><strong>Категорія:</strong> @Model.Category</p>
+    <p><strong>Дата створення:</strong> @Model.UploadDate.ToString("dd.MM.yyyy")</p>
+    <p><strong>Статус:</strong> @TextHelper.Text($"ArticleStatus_{Model.Status}")</p>
+    @if (!string.IsNullOrEmpty(Model.Comment))
+    {
+        <p><strong>Comment:</strong> @Model.Comment</p>
+    }
+
+    <h3>Версії</h3>
+    <ul class="list-group mb-3">
+        @foreach (var version in Model.Versions)
+        {
+            <li class="list-group-item">
+                <a href="@Url.Action("VersionDetails", "Article", new { id = version.Id })">
+                    Версія №@version.VersionNumber - @version.UploadDate.ToString("dd.MM.yyyy")
+                </a>
+                @if (!string.IsNullOrEmpty(version.Comment))
+                {
+                    <p><strong>Примітка:</strong> @version.Comment</p>
+                }
+            </li>
+        }
+    </ul>
+
+    @if (Model.Status == ArticleStatus.Rework)
+    {
+        <a class="btn btn-primary" href="@Url.Action("UploadVersion", "Article", new { articleId = Model.Id })">Завантажити нову версію</a>
+    }
+</div>

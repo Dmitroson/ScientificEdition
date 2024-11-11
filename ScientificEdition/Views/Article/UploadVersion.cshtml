@@ -1,0 +1,27 @@
+﻿@model ArticleVersionInputModel
+@using ScientificEdition.Models.Article
+
+@{
+    ViewData["Title"] = "Нова версія";
+}
+
+<div class="container mt-5 col-6">
+    <h2>@ViewData["Title"]</h2>
+    <form asp-action="UploadVersion" method="post" enctype="multipart/form-data">
+        @Html.HiddenFor(m => m.ArticleId)
+        <div class="mb-3">
+            <label asp-for="File">Файл</label>
+            <input asp-for="File" type="file" accept=".docx, .doc, .pdf" class="form-control" />
+            <span asp-validation-for="File" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Comment" class="form-label">Примітка</label>
+            <textarea id="editor" class="form-control" name="Comment"></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Завантажити</button>
+        @Html.ActionLink("Назад", "Details", "Article", new { id = Model.ArticleId }, new { @class = "btn btn-secondary" })
+    </form>
+</div>
+

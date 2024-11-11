@@ -1,0 +1,75 @@
+﻿@* @model IEnumerable<PublicationJournal>
+
+@{
+    ViewData["Title"] = "Список публікацій";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 text-primary">Список публікацій</h2>
+
+    <table class="table table-bordered table-hover shadow-sm">
+        <thead>
+            <tr class="table-secondary">
+                <th>Заголовок</th>
+                <th>Дата публікації</th>
+                <th>Автор</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var publication in Model)
+            {
+                <tr>
+                    <td>@publication.Title</td>
+                    <td>@publication.PublicationDate.ToString("g")</td>
+                    <td>@(publication.Author ?? "Невідомий автор")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@publication.Id" class="btn btn-sm btn-primary">Редагувати</a>
+                        <a asp-action="Delete" asp-route-id="@publication.Id" class="btn btn-sm btn-danger">Видалити</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-4 text-center">
+        <a asp-action="Create" class="btn btn-success">Додати нову публікацію</a>
+    </div>
+</div>
+
+<style>
+    h2.text-primary {
+        color: #007bff;
+        font-weight: 600;
+    }
+
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 14px;
+    }
+
+    .btn-success {
+        font-size: 16px;
+        padding: 10px 20px;
+    }
+
+    .table-secondary {
+        background-color: #e9ecef;
+        color: #333;
+        font-weight: 600;
+    }
+</style>
+ *@

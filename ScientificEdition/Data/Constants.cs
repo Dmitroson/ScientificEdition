@@ -6,4 +6,14 @@
         public const string Admin = "Admin";
         public const string Reviewer = "Reviewer";
     }
+
+    public enum ArticleStatus
+    {
+        New,
+        Review,
+        Rework,
+        Approved,
+        Published,
+        Cancelled
+    }
 }

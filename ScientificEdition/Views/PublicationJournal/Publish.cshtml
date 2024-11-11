@@ -1,0 +1,52 @@
+﻿@* @model             Article
+
+@{
+    ViewData["Title"] = "Публікація статті";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Публікація статті: @Model.Title</h2>
+
+    <form asp-action="Publish" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Заголовок</label>
+            <input asp-for="Title" class="form-control" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">Контент</label>
+            <textarea asp-for="Content" class="form-control" readonly rows="5"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Дата публікації</label>
+            <input type="text" class="form-control" value="@DateTime.Now.ToString("dd.MM.yyyy")" readonly />
+        </div>
+
+        <div class="mb-3 text-center">
+            <button type="submit" class="btn btn-success mx-2">Опублікувати</button>
+            <a asp-action="Index" class="btn btn-secondary mx-2">Скасувати</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    .form-control[readonly] {
+        background-color: #f8f9fa;
+    }
+
+    .btn {
+        min-width: 120px;
+    }
+
+    .text-center {
+        margin-top: 15px;
+    }
+</style>
+ *@

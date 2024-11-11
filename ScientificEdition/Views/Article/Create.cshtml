@@ -1,0 +1,49 @@
+﻿@model ArticleInputModel
+@using ScientificEdition.Models.Article
+
+@{
+    ViewData["Title"] = "Створити нову статтю";
+}
+
+<div class="container mt-5 col-6">
+    <h2>Створити нову статтю</h2>
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Заголовок</label>
+            <input asp-for="Title" class="form-control" required />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label">Категорія</label>
+            <input asp-for="Category" class="form-control" required />
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="File">Файл</label>
+            <input asp-for="File" type="file" accept=".docx, .doc, .pdf" class="form-control" />
+            <span asp-validation-for="File" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Comment" class="form-label">Коментар</label>
+            <textarea id="editor" class="form-control" name="Comment"></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Створити статтю</button>
+        <a asp-controller="Article" asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/tinymce/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#editor',
+            height: 300,
+            menubar: false,
+            plugins: 'lists link image code',
+            toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
+            content_css: '/css/content.css'
+        });
+    </script>
+}
