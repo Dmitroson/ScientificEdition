@@ -7,11 +7,11 @@
 
 <div class="container mt-5">
     <h2>@Model.Article!.Title - Версія №@Model.VersionNumber</h2>
-    <p><strong>Upload Date:</strong> @Model.UploadDate.ToString("dd/MM/yyyy")</p>
+    <p><strong>Дата завантаження:</strong> @Model.UploadDate.ToString("dd/MM/yyyy")</p>
 
     @if (!string.IsNullOrEmpty(Model.Comment))
     {
-        <p><strong>Reviewer Comment:</strong> @Html.Raw(Model.Comment)</p>
+        <p><strong>Коментар:</strong> @Html.Raw(Model.Comment)</p>
     }
 
     <a href="@Url.Action("DownloadVersion", "Article", new { versionId = Model.Id })" class="btn btn-success">Завантажити</a>
