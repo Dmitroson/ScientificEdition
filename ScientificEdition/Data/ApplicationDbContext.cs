@@ -10,8 +10,6 @@ namespace ScientificEdition.Data
         public DbSet<ArticleVersion> ArticleVersions { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
-        //public DbSet<PublicationJournal> PublicationJournals { get; set; }
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 

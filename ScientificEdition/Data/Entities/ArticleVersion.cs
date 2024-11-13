@@ -15,7 +15,7 @@ namespace ScientificEdition.Data.Entities
         [Required]
         public required string FilePath { get; set; }
 
-        public string? Comment { get; set; }
+        public string? Comment { get; set; } 
 
         [Required]
         public DateTime UploadDate { get; set; }

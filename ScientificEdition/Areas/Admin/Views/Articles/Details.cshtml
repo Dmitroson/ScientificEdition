@@ -1,0 +1,45 @@
+﻿@model Article
+@using ScientificEdition.Data
+@using ScientificEdition.Data.Entities
+
+@{
+    ViewData["Title"] = "Стаття";
+}
+
+<div class="container mt-5 col-lg-9">
+    <h2>@Model.Title</h2>
+    <p><strong>Автор:</strong> @Model.Author!.FullName</p>
+    <p><strong>Категорія:</strong> @Model.Category</p>
+    <p><strong>Дата створення:</strong> @Model.UploadDate.ToString("dd.MM.yyyy")</p>
+    <p><strong>Статус:</strong> @TextHelper.Text($"ArticleStatus_{Model.Status}")</p>
+    @if (!string.IsNullOrEmpty(Model.Comment))
+    {
+        <p><strong>Коментар:</strong> @Model.Comment</p>
+    }
+
+    <h3>Версії</h3>
+    <ul class="list-group mb-3">
+        @foreach (var version in Model.Versions)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="@Url.Action("VersionDetails", "Articles", new { id = version.Id })">
+                        Версія №@version.VersionNumber - @version.UploadDate.ToString("dd.MM.yyyy")
+                    </a>
+                    @if (!string.IsNullOrEmpty(version.Comment))
+                    {
+                        <p><strong>Примітка:</strong> @version.Comment</p>
+                    }
+                </div>
+                <a class="btn btn-outline-secondary btn-sm" href="@Url.Action("DownloadVersion", "Articles", new { versionId = version.Id })">
+                    Завантажити
+                </a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.Status == ArticleStatus.New)
+    {
+        <a class="btn btn-primary" href="@Url.Action("AssignReviewers", "Articles", new { articleId = Model.Id })">Призначити рецензентів</a>
+    }
+</div>

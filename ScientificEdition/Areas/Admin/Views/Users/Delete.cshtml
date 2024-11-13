@@ -1,0 +1,38 @@
+﻿@model (User User, string Role)
+@using ScientificEdition.Data
+@using ScientificEdition.Data.Entities
+
+@{
+    ViewData["Title"] = "Видалення користувача";
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/Admin">Панель керування</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="@Url.ActionLink("Index", "Users", new { role = Model.Role })">
+                    @TextHelper.Text($"UsersList_{Model.Role}")
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Видалення користувача</li>
+        </ol>
+    </nav>
+
+    <h2>Видалення користувача</h2>
+    <div class="alert alert-danger mt-3" role="alert">
+        Ви впевнені, що хочете видалити користувача?
+    </div>
+    <div>
+        <strong>ПІБ:</strong> @Model.User.FullName <br />
+        <strong>E-mail:</strong> @Model.User.Email <br />
+        <strong>Тип користувача:</strong> @TextHelper.Text($"UserRole_{Model.Role}")
+    </div>
+
+    <form asp-action="DeleteConfirmed" method="post">
+        <button type="submit" class="btn btn-danger mt-3">Так, Видалити</button>
+        <a href="@Url.ActionLink("Index", "Users", new { role = Model.Role })" class="btn btn-secondary mt-3">Скасувати</a>
+    </form>
+</div>

@@ -1,0 +1,50 @@
+﻿@model List<Article>
+@using ScientificEdition.Data.Entities
+
+@{
+    ViewData["Title"] = "Список статей";
+}
+
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/Admin">Панель керування</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Список статей</li>
+        </ol>
+    </nav>
+    <h2 class="">Список статей</h2>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Стаття</th>
+                <th>Категорія</th>
+                <th>Автор</th>
+                <th>Дата завантаження</th>
+                <th>Статус</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var article in Model)
+            {
+                var author = article.Author!;
+                <tr>
+                    <td>@article.Title</td>
+                    <td>@article.Category</td>
+                    <td>
+                        <a asp-controller="Users" asp-action="Edit" asp-route-id="@author.Id">@author.FullName</a>
+                    </td>
+                    <td>@article.UploadDate.ToString("dd.MM.yyyy")</td>
+                    <td>@TextHelper.Text($"ArticleStatus_{article.Status.ToString()}")</td>
+                    <td class="text-center">
+                        <a asp-controller="Articles" asp-action="Details" asp-route-id="@article.Id" class="btn btn-info btn-sm">Деталі</a>
+                        <a asp-controller="Articles" asp-action="Edit" asp-route-id="@article.Id" class="btn btn-info btn-sm">Редагувати</a>
+                        <a asp-controller="Articles" asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger btn-sm">Видалити</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

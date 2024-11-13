@@ -135,4 +135,19 @@
   <data name="ArticleStatus_Cancelled" xml:space="preserve">
     <value>Відмова</value>
   </data>
+  <data name="UsersList_Author" xml:space="preserve">
+    <value>Автори</value>
+  </data>
+  <data name="UsersList_Reviewer" xml:space="preserve">
+    <value>Рецензенти</value>
+  </data>
+  <data name="UserRole_Author" xml:space="preserve">
+    <value>Автор</value>
+  </data>
+  <data name="UserRole_Reviewer" xml:space="preserve">
+    <value>Рецензент</value>
+  </data>
+  <data name="UserRole_Admin" xml:space="preserve">
+    <value>Адмін</value>
+  </data>
 </root>

@@ -1,0 +1,42 @@
+﻿@page
+@using ScientificEdition.Data
+@model ScientificEdition.Areas.Admin.Pages.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1>Панель керування</h1>
+
+<div class="container mt-4">
+    <h2>Швидкий доступ</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Користувачі</h5>
+                    <a href="@Url.ActionLink("Index", "Users", new { role = UserRoles.Author })" class="btn btn-primary">Автори</a>
+                    <a href="@Url.ActionLink("Index", "Users", new { role = UserRoles.Reviewer })" class="btn btn-primary">Рецензенти</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Наукові роботи</h5>
+                    <a href="/Admin/Articles" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Категорії</h5>
+                    <a href="/Admin/Categories" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

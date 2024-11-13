@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Business;
@@ -39,12 +40,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+RegisterRoutes(app);
+
 app.MapRazorPages();
 
 app.Run();
@@ -57,4 +56,17 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<TextHelper>();
 
     services.AddScoped<ArticleManager>();
+}
+
+static void RegisterRoutes(WebApplication app)
+{
+    app.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}"
+    ).RequireAuthorization(new AuthorizeAttribute { Roles = UserRoles.Admin });
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}"
+    );
 }
