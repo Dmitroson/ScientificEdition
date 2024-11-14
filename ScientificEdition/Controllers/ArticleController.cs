@@ -224,6 +224,7 @@ namespace ScientificEdition.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
+            // To be implemented.
             var article = await dbContext.Articles.FindAsync(id);
             if (article == null)
                 return NotFound();
@@ -243,6 +244,7 @@ namespace ScientificEdition.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ArticleViewModel model)
         {
+            // To be implemented.
             if (ModelState.IsValid)
             {
                 var article = await dbContext.Articles.FindAsync(model.Id);
