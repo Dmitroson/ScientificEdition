@@ -56,6 +56,8 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<TextHelper>();
 
     services.AddScoped<ArticleManager>();
+    services.AddScoped<CategoryManager>();
+    services.AddScoped<ReviewerManager>();
 }
 
 static void RegisterRoutes(WebApplication app)

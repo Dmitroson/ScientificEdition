@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScientificEdition.Data;
 
@@ -11,9 +12,11 @@ using ScientificEdition.Data;
 namespace ScientificEdition.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241130163749_SeedBaseCategories")]
+    partial class SeedBaseCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace ScientificEdition.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ArticleUser", b =>
-                {
-                    b.Property<Guid>("AssignedArticlesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ReviewersId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("AssignedArticlesId", "ReviewersId");
-
-                    b.HasIndex("ReviewersId");
-
-                    b.ToTable("ArticleReviewers", (string)null);
-                });
 
             modelBuilder.Entity("CategoryUser", b =>
                 {
@@ -372,21 +360,6 @@ namespace ScientificEdition.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ArticleUser", b =>
-                {
-                    b.HasOne("ScientificEdition.Data.Entities.Article", null)
-                        .WithMany()
-                        .HasForeignKey("AssignedArticlesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ScientificEdition.Data.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("ReviewersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CategoryUser", b =>
                 {
                     b.HasOne("ScientificEdition.Data.Entities.Category", null)
@@ -456,7 +429,7 @@ namespace ScientificEdition.Data.Migrations
             modelBuilder.Entity("ScientificEdition.Data.Entities.Article", b =>
                 {
                     b.HasOne("ScientificEdition.Data.Entities.User", "Author")
-                        .WithMany("Articles")
+                        .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -508,11 +481,6 @@ namespace ScientificEdition.Data.Migrations
                 });
 
             modelBuilder.Entity("ScientificEdition.Data.Entities.Category", b =>
-                {
-                    b.Navigation("Articles");
-                });
-
-            modelBuilder.Entity("ScientificEdition.Data.Entities.User", b =>
                 {
                     b.Navigation("Articles");
                 });

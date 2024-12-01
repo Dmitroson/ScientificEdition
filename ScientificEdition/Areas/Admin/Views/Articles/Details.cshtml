@@ -9,7 +9,7 @@
 <div class="container mt-5 col-lg-9">
     <h2>@Model.Title</h2>
     <p><strong>Автор:</strong> @Model.Author!.FullName</p>
-    <p><strong>Категорія:</strong> @Model.Category</p>
+    <p><strong>Категорія:</strong> @Model.Category!.Name</p>
     <p><strong>Дата створення:</strong> @Model.UploadDate.ToString("dd.MM.yyyy")</p>
     <p><strong>Статус:</strong> @TextHelper.Text($"ArticleStatus_{Model.Status}")</p>
     @if (!string.IsNullOrEmpty(Model.Comment))
@@ -38,8 +38,32 @@
         }
     </ul>
 
-    @if (Model.Status == ArticleStatus.New)
+    @if (Model.Reviewers.Any())
     {
-        <a class="btn btn-primary" href="@Url.Action("AssignReviewers", "Articles", new { articleId = Model.Id })">Призначити рецензентів</a>
+        <h3>Рецензенти</h3>
+        <ul class="list-group">
+            @foreach (var reviewer in Model.Reviewers)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="@Url.Action("Edit", "Users", new { id = reviewer.Id })">
+                            @reviewer.FullName
+                        </a>
+                    </div>
+                </li>
+            }
+        </ul>
     }
+
+    <div class="mt-4">
+        <a class="btn btn-info" href="@Url.Action("Edit", "Articles", new { id = Model.Id })">Редагувати статтю</a>
+        @if (Model.Status == ArticleStatus.New)
+        {
+            <a class="btn btn-primary" href="@Url.Action("AssignReviewers", "Articles", new { articleId = Model.Id })">Призначити рецензентів</a>
+        }
+        else if (Model.Status == ArticleStatus.Review)
+        {
+            <a class="btn btn-primary" href="@Url.Action("AssignReviewers", "Articles", new { articleId = Model.Id })">Змінити рецензентів</a>
+        }
+    </div>
 </div>

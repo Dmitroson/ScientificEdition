@@ -25,6 +25,5 @@ namespace ScientificEdition.Data.Entities
 
         [ForeignKey(nameof(ReviewerId))]
         public User? Reviewer { get; set; }
-
     }
 }

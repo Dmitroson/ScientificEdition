@@ -1,5 +1,4 @@
 ﻿using ScientificEdition.Data;
-using System.ComponentModel.DataAnnotations;
 
 namespace ScientificEdition.Models.Article
 {
@@ -9,7 +8,7 @@ namespace ScientificEdition.Models.Article
 
         public required string Title { get; set; }
 
-        public required string Category { get; set; }
+        public Guid CategoryId { get; set; }
 
         public DateTime UploadDate { get; set; }
 

@@ -32,7 +32,7 @@
                 var author = article.Author!;
                 <tr>
                     <td>@article.Title</td>
-                    <td>@article.Category</td>
+                    <td>@article.Category!.Name</td>
                     <td>
                         <a asp-controller="Users" asp-action="Edit" asp-route-id="@author.Id">@author.FullName</a>
                     </td>
@@ -40,7 +40,6 @@
                     <td>@TextHelper.Text($"ArticleStatus_{article.Status.ToString()}")</td>
                     <td class="text-center">
                         <a asp-controller="Articles" asp-action="Details" asp-route-id="@article.Id" class="btn btn-info btn-sm">Деталі</a>
-                        <a asp-controller="Articles" asp-action="Edit" asp-route-id="@article.Id" class="btn btn-info btn-sm">Редагувати</a>
                         <a asp-controller="Articles" asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger btn-sm">Видалити</a>
                     </td>
                 </tr>

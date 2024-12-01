@@ -1,10 +1,8 @@
-﻿using ScientificEdition.Mvc.Filters.Validation;
-using System.ComponentModel.DataAnnotations;
-using static ScientificEdition.Business.Constants.Validation;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ScientificEdition.Models.Article
 {
-    public class ArticleInputModel
+    public class ArticleEditViewModel
     {
         public Guid Id { get; set; }
 
@@ -16,11 +14,6 @@ namespace ScientificEdition.Models.Article
         [Required(ErrorMessage = "Поле обов'язкове.")]
         [Display(Name = "Категорія")]
         public Guid CategoryId { get; set; }
-
-        [Required(ErrorMessage = "Файл обов'язковий.")]
-        [AllowedExtensions([".docx", ".doc", ".pdf"], [FileContentTypes.Docx, FileContentTypes.Doc, FileContentTypes.Pdf])]
-        [Display(Name = "Файл")]
-        public required IFormFile File { get; set; }
 
         [Display(Name = "Коментар")]
         public string? Comment { get; set; }

@@ -39,6 +39,7 @@ namespace ScientificEdition.Controllers
             var articles = dbContext.Articles
                 .Where(a => a.AuthorId.Equals(userId))
                 .Include(a => a.Author)
+                .Include(a => a.Category)
                 .ToList();
 
             return View(articles);
@@ -49,6 +50,7 @@ namespace ScientificEdition.Controllers
         {
             var article = dbContext.Articles
                 .Include(a => a.Author)
+                .Include(a => a.Category)
                 .Include(a => a.Versions)
                 .FirstOrDefault(m => m.Id == id);
 
@@ -123,6 +125,10 @@ namespace ScientificEdition.Controllers
             if (model.File == null || model.File.Length <= 0)
                 return View(model);
 
+            var category = await dbContext.Categories.FindAsync(model.CategoryId);
+            if (category == null)
+                return NotFound();
+
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return NotFound();
@@ -131,7 +137,7 @@ namespace ScientificEdition.Controllers
             {
                 Id = Guid.NewGuid(),
                 Title = model.Title,
-                Category = model.Category,
+                CategoryId = category.Id,
                 UploadDate = DateTime.Now,
                 Status = ArticleStatus.New,
                 AuthorId = userId
@@ -215,6 +221,7 @@ namespace ScientificEdition.Controllers
                 UploadDate = DateTime.Now
             };
 
+            article.Status = ArticleStatus.Review;
             dbContext.ArticleVersions.Add(version);
             dbContext.SaveChanges();
 
@@ -224,17 +231,15 @@ namespace ScientificEdition.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            // To be implemented.
             var article = await dbContext.Articles.FindAsync(id);
             if (article == null)
                 return NotFound();
 
-            var model = new ArticleViewModel
+            var model = new ArticleEditViewModel
             {
                 Id = article.Id,
                 Title = article.Title,
-                Category = article.Category,
-                Status = article.Status
+                CategoryId = article.CategoryId
             };
 
             return View(model);
@@ -242,18 +247,21 @@ namespace ScientificEdition.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ArticleViewModel model)
+        public async Task<IActionResult> Edit(ArticleEditViewModel model)
         {
-            // To be implemented.
             if (ModelState.IsValid)
             {
                 var article = await dbContext.Articles.FindAsync(model.Id);
                 if (article == null)
                     return NotFound();
 
+                var category = await dbContext.Categories.FindAsync(model.CategoryId);
+                if (category == null)
+                    return NotFound();
+
                 article.Title = model.Title;
-                article.Category = model.Category;
-                article.Status = model.Status;
+                article.Category = category;
+                //article.Status = model.Status;
 
                 dbContext.Update(article);
                 await dbContext.SaveChangesAsync();

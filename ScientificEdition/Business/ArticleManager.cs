@@ -1,4 +1,6 @@
-﻿using ScientificEdition.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ScientificEdition.Data;
+using ScientificEdition.Data.Entities;
 
 namespace ScientificEdition.Business
 {
@@ -8,6 +10,15 @@ namespace ScientificEdition.Business
 
         public ArticleManager(ApplicationDbContext dbContext)
             => this.dbContext = dbContext;
+
+        public Article? GetArticle(Guid articleId)
+        {
+            return dbContext.Articles
+                .Include(a => a.Author)
+                .Include(a => a.Category)
+                .Include(a => a.Reviewers)
+                .FirstOrDefault(m => m.Id == articleId);
+        }
 
         public int GenerateNewArticleVersionNumber(Guid articleId)
         {

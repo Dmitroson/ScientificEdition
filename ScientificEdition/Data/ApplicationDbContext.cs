@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Data.Entities;
+using System.Reflection.Emit;
 
 namespace ScientificEdition.Data
 {
@@ -8,6 +9,7 @@ namespace ScientificEdition.Data
     {
         public DbSet<Article> Articles { get; set; }
         public DbSet<ArticleVersion> ArticleVersions { get; set; }
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -32,6 +34,34 @@ namespace ScientificEdition.Data
                 .WithMany()
                 .HasForeignKey(r => r.ReviewerId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Category>()
+                .HasMany(c => c.Articles)
+                .WithOne(a => a.Category)
+                .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Article>()
+                .HasOne(a => a.Author)
+                .WithMany()
+                .HasForeignKey(a => a.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Category>()
+                .HasMany(c => c.Users)
+                .WithMany(u => u.Categories)
+                .UsingEntity(j => j.ToTable("CategoryUsers"));
+
+            builder.Entity<Article>()
+                .HasOne(a => a.Author)
+                .WithMany(u => u.Articles)
+                .HasForeignKey(a => a.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Article>()
+                .HasMany(a => a.Reviewers)
+                .WithMany(u => u.AssignedArticles)
+                .UsingEntity(j => j.ToTable("ArticleReviewers"));
         }
     }
 }

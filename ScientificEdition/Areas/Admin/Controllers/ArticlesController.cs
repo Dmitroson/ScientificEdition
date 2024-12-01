@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Packaging;
+using ScientificEdition.Areas.Admin.Models.Article;
 using ScientificEdition.Business;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
-using ScientificEdition.Utilities.Files;
+using System.Linq;
 
 namespace ScientificEdition.Areas.Admin.Controllers
 {
@@ -12,20 +14,17 @@ namespace ScientificEdition.Areas.Admin.Controllers
     public class ArticlesController : Controller
     {
         private readonly UserManager<User> userManager;
-        private readonly FileManager fileManager;
         private readonly ArticleManager articleManager;
         private readonly ApplicationDbContext dbContext;
 
         public ArticlesController(
             UserManager<User> userManager,
-            FileManager fileManager,
             ArticleManager articleManager,
-            ApplicationDbContext context)
+            ApplicationDbContext dbContext)
         {
             this.userManager = userManager;
-            this.fileManager = fileManager;
             this.articleManager = articleManager;
-            dbContext = context;
+            this.dbContext = dbContext;
         }
 
         [HttpGet]
@@ -33,6 +32,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
         {
             var articles = dbContext.Articles
                 .Include(a => a.Author)
+                .Include(a => a.Category)
                 .ToList();
 
             return View(articles);
@@ -43,7 +43,9 @@ namespace ScientificEdition.Areas.Admin.Controllers
         {
             var article = dbContext.Articles
                 .Include(a => a.Author)
+                .Include(a => a.Category)
                 .Include(a => a.Versions)
+                .Include(a => a.Reviewers)
                 .FirstOrDefault(m => m.Id == id);
 
             if (article == null)
@@ -84,11 +86,127 @@ namespace ScientificEdition.Areas.Admin.Controllers
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
 
-            var article = version.Article!;
-            var articleVersionTitle = $"{article.Title}_v{version.VersionNumber}_{article.Author!.FullName}";
+            var author = version.Article!.Author;
+            var authorDownloadingName = $"{author!.LastName}-{author.FirstName}";
+
+            var articleVersionTitle = $"{authorDownloadingName}_{version.Article!.Title}_v{version.VersionNumber}";
             var downloadFileName = $"{articleVersionTitle}{Path.GetExtension(filePath)}";
 
             return PhysicalFile(filePath, "application/octet-stream", downloadFileName);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var article = await dbContext.Articles.FindAsync(id);
+            if (article == null)
+                return NotFound();
+
+            var model = new ArticleInputModel
+            {
+                Id = article.Id,
+                Title = article.Title,
+                CategoryId = article.CategoryId,
+                Status = article.Status
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ArticleInputModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var article = await dbContext.Articles.FindAsync(model.Id);
+                if (article == null)
+                    return NotFound();
+
+                var category = await dbContext.Categories.FindAsync(model.CategoryId);
+                if (category == null)
+                    return NotFound();
+
+                article.Title = model.Title;
+                article.Category = category;
+                article.Status = model.Status;
+
+                dbContext.Update(article);
+                await dbContext.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AssignReviewers(Guid articleId)
+        {
+            var article = articleManager.GetArticle(articleId);
+            if (article == null)
+                return NotFound();
+            if (article.Status != ArticleStatus.New && article.Status != ArticleStatus.Review)
+                return NotFound();
+
+            var assignedReviewers = article.Reviewers.Select(r => r.Id).ToList();
+            var model = new ReviewersAssignmentModel
+            {
+                ArticleId = articleId,
+                Article = article,
+                ReviewerIds = assignedReviewers
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignReviewers(ReviewersAssignmentModel model)
+        {
+            var article = articleManager.GetArticle(model.ArticleId);
+            if (article == null)
+                return NotFound();
+            if (article.Status != ArticleStatus.New && article.Status != ArticleStatus.Review)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                model.Article = article;
+                return View(model);
+            }
+
+            if (model.ReviewerIds.Count > 2)
+            {
+                ModelState.AddModelError(nameof(ReviewersAssignmentModel.ReviewerIds), "Потрібно обрати 2 рецензенти.");
+                return View(model);
+            }
+
+            var selectedUsers = dbContext.Users.Where(u => model.ReviewerIds.Contains(u.Id)).ToList();
+            var validReviewers = new List<User>();
+            foreach (var user in selectedUsers)
+            {
+                if (user != null && await userManager.IsInRoleAsync(user, UserRoles.Reviewer))
+                    validReviewers.Add(user);
+            }
+
+            if (validReviewers.Count < 2)
+            {
+                ModelState.AddModelError(nameof(ReviewersAssignmentModel.ReviewerIds), "Деякі рецензенти недоступні для вибору.");
+
+                model.ReviewerIds = validReviewers.Select(r => r.Id).ToList();
+                return View(model);
+            }
+
+            article.Reviewers.Clear();
+            article.Reviewers.AddRange(validReviewers);
+
+            if (model.MoveToReview)
+                article.Status = ArticleStatus.Review;
+
+            await dbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details), new { id = article.Id });
         }
     }
 }

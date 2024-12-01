@@ -1,8 +1,16 @@
 ﻿@model ArticleInputModel
+@using ScientificEdition.Business
 @using ScientificEdition.Models.Article
+@inject CategoryManager CategoryManager
 
 @{
     ViewData["Title"] = "Створити нову статтю";
+
+    var categoryOptions = CategoryManager.GetAllCategories().Select(category => new SelectListItem
+            {
+                Text = category.Name,
+                Value = category.Id.ToString()
+            });
 }
 
 <div class="container mt-5 col-6">
@@ -14,9 +22,9 @@
             <span asp-validation-for="Title" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label asp-for="Category" class="form-label">Категорія</label>
-            <input asp-for="Category" class="form-control" required />
-            <span asp-validation-for="Category" class="text-danger"></span>
+            <label asp-for="CategoryId" class="form-label">Категорія</label>
+            @Html.DropDownListFor(m => m.CategoryId, categoryOptions, "Оберіть категорію...", new { @class = "form-select" })
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label asp-for="File">Файл</label>

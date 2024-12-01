@@ -12,7 +12,10 @@ namespace ScientificEdition.Data.Entities
         public required string Title { get; set; }
 
         [Required]
-        public required string Category { get; set; }
+        public Guid CategoryId { get; set; }
+
+        [ForeignKey(nameof(CategoryId))]
+        public Category? Category { get; set; }
 
         public string? Comment { get; set; }
 
@@ -27,6 +30,8 @@ namespace ScientificEdition.Data.Entities
 
         [ForeignKey(nameof(AuthorId))]
         public User? Author { get; set; }
+
+        public ICollection<User> Reviewers { get; set; } = [];
 
         public ICollection<ArticleVersion> Versions { get; set; } = [];
     }

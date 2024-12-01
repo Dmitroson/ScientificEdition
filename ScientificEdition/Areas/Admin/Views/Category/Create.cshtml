@@ -1,0 +1,24 @@
+﻿@model ScientificEdition.Areas.Admin.Models.Category.CategoryInputModel
+
+@{
+    ViewData["Title"] = "Нова категорія";
+}
+
+<div class="container mt-5 col-lg-9">
+    <h2>Нова категорія</h2>
+
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Назва</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Category")">Скасувати</a>
+        </div>
+    </form>
+
+    <a class="btn btn-link" href="@Url.Action("Index", "Category")">Повернутись до списку</a>
+</div>

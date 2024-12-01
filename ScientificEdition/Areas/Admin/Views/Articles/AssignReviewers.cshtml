@@ -1,0 +1,47 @@
+﻿@model ReviewersAssignmentModel
+@using ScientificEdition.Areas.Admin.Models.Article
+@using ScientificEdition.Business
+@using ScientificEdition.Data
+@using ScientificEdition.Data.Entities
+@inject ReviewerManager ReviewerManager
+
+@{
+    ViewData["Title"] = "Призначити рецензентів";
+
+    var availableReviewers = await ReviewerManager.GetAvailableReviewersForArticle(Model.ArticleId);
+    var availableReviewerOptions = availableReviewers.Select(r => new SelectListItem
+            {
+                Text = $"{r.FullName} (Статей: {r.AssignedArticles.Count})",
+                Value = r.Id
+            });
+}
+
+<div class="container mt-5 col-lg-9">
+    <h2>@Model.Article!.Title</h2>
+    <p><strong>Автор:</strong> @Model.Article.Author!.FullName</p>
+    <p><strong>Категорія:</strong> @Model.Article.Category!.Name</p>
+    <p><strong>Дата створення:</strong> @Model.Article.UploadDate.ToString("dd.MM.yyyy")</p>
+
+    <form asp-action="AssignReviewers" method="post">
+        <input type="hidden" asp-for="ArticleId" />
+
+        <div class="form-group">
+            <label asp-for="ReviewerIds"><strong>Доступні рецензенти:</strong></label>
+            <select asp-for="ReviewerIds" asp-items="availableReviewerOptions" multiple class="form-control">
+            </select>
+            <span asp-validation-for="ReviewerIds" class="text-danger"></span>
+        </div>
+
+        @if (Model.Article.Status == ArticleStatus.New)
+        {
+            <div class="form-group mt-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" asp-for="MoveToReview" />
+                    <label class="form-check-label" asp-for="MoveToReview">Передати на перевірку</label>
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary mt-3">Призначити</button>
+    </form>
+</div>

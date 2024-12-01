@@ -25,7 +25,7 @@
             {
                 <tr>
                     <td>@article.Title</td>
-                    <td>@article.Category</td>
+                    <td>@article.Category!.Name</td>
                     <td>@article.UploadDate.ToString("dd.MM.yyyy")</td>
                     <td>@TextHelper.Text($"ArticleStatus_{article.Status.ToString()}")</td>
                     <td class="text-center">

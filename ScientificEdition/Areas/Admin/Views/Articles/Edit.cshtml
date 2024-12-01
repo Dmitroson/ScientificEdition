@@ -1,4 +1,4 @@
-﻿@model ScientificEdition.Models.Article.ArticleEditViewModel
+﻿@model ScientificEdition.Areas.Admin.Models.Article.ArticleInputModel
 @using ScientificEdition.Business
 @using ScientificEdition.Data
 @using ScientificEdition.Data.Entities
@@ -12,6 +12,13 @@
             {
                 Text = category.Name,
                 Value = category.Id.ToString()
+            });
+
+    var statuses = Enum.GetValues(typeof(ArticleStatus)) as IEnumerable<ArticleStatus>;
+    var statusOptions = statuses!.Select(status => new SelectListItem
+            {
+                Text = TextHelper.Text($"ArticleStatus_{status}"),
+                Value = status.ToString()
             });
 }
 
@@ -29,6 +36,12 @@
             <label asp-for="CategoryId" class="form-label">Категорія</label>
             @Html.DropDownListFor(m => m.CategoryId, categoryOptions, "Оберіть категорію...", new { @class = "form-select" })
             <span asp-validation-for="CategoryId"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label">Статус</label>
+            @Html.DropDownListFor(m => m.Status, statusOptions, new { @class = "form-select" })
+            <span asp-validation-for="Status" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
