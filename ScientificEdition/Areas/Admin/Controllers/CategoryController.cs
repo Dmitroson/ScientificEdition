@@ -21,7 +21,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Index()
         {
-            var categories = categoryManager.GetAllCategories();
+            var categories = categoryManager.GetAllCategories(true);
             return View(categories);
         }
 

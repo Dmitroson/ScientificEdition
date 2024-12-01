@@ -1,4 +1,5 @@
-﻿using ScientificEdition.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
 
 namespace ScientificEdition.Business
@@ -10,10 +11,18 @@ namespace ScientificEdition.Business
         public CategoryManager(ApplicationDbContext dbContext)
             => this.dbContext = dbContext;
 
-        public List<Category> GetAllCategories()
+        public List<Category> GetAllCategories(bool includeRelatedEntities = false)
         {
-            var categories = dbContext.Categories.OrderBy(c => c.Name);
-            return [.. categories];
+            var categories = dbContext.Categories.AsQueryable();
+
+            if (includeRelatedEntities)
+            {
+                categories = categories
+                    .Include(c => c.Articles)
+                    .Include(c => c.Users);
+            }
+
+            return [.. categories.OrderBy(c => c.Name)];
         }
     }
 }

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging;
 using ScientificEdition.Areas.Admin.Models.Article;
 using ScientificEdition.Business;
+using ScientificEdition.Business.Constants;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
-using System.Linq;
 
 namespace ScientificEdition.Areas.Admin.Controllers
 {
@@ -28,13 +28,47 @@ namespace ScientificEdition.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string? query, string? status = null, string? category = null,
+            string? sortField = null, string? sortOrder = null)
         {
-            var articles = dbContext.Articles
+            var articlesQuery = dbContext.Articles
                 .Include(a => a.Author)
                 .Include(a => a.Category)
-                .ToList();
+                .AsQueryable();
 
+            query = query?.Trim();
+            if (!string.IsNullOrEmpty(query))
+            {
+                var querySegments = query.ToLower().Split(' ');
+                articlesQuery = articlesQuery
+                    .Where(a => querySegments.Any(q => a.Title.ToLower().Contains(q))
+                        || querySegments.Any(q => a.Author!.FirstName.ToLower().Contains(q))
+                        || querySegments.Any(q => a.Author!.LastName.ToLower().Contains(q)));
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (Enum.TryParse<ArticleStatus>(status, out var articleStatus))
+                    articlesQuery = articlesQuery.Where(a => a.Status == articleStatus);
+            }
+
+            if (!string.IsNullOrEmpty(category))
+                articlesQuery = articlesQuery.Where(a => a.Category!.Name == category);
+
+            articlesQuery = sortField switch
+            {
+                Sorting.Fields.Title => sortOrder == Sorting.Order.SortDescending
+                    ? articlesQuery.OrderByDescending(a => a.Title)
+                    : articlesQuery.OrderBy(a => a.Title),
+
+                Sorting.Fields.UploadDate => sortOrder == Sorting.Order.SortDescending
+                    ? articlesQuery.OrderByDescending(a => a.UploadDate)
+                    : articlesQuery.OrderBy(a => a.UploadDate),
+
+                _ => articlesQuery.OrderByDescending(a => a.UploadDate)
+            };
+
+            var articles = articlesQuery.ToList();
             return View(articles);
         }
 
