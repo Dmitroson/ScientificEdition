@@ -28,5 +28,19 @@ namespace ScientificEdition.Business
             var versionsCount = dbContext.ArticleVersions.Where(v => v.ArticleId == articleId).Count();
             return versionsCount + 1;
         }
+
+        public async Task<int> CountArticlesToRework(string userId)
+        {
+            return await dbContext.Articles
+                .CountAsync(a => a.AuthorId.Equals(userId) && a.Status == ArticleStatus.Rework);
+        }
+
+        public async Task<int> CountArticlesToReview(string userId)
+        {
+            return await dbContext.Articles
+                .CountAsync(a => a.Status == ArticleStatus.Review
+                    && a.Reviewers.Any(reviewer => reviewer.Id == userId
+                        && !reviewer.Reviews.Any(review => review.ArticleVersion!.ArticleId == a.Id)));
+        }
     }
 }

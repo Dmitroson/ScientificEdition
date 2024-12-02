@@ -150,4 +150,10 @@
   <data name="UserRole_Admin" xml:space="preserve">
     <value>Адмін</value>
   </data>
+  <data name="ReviewResult_Approved" xml:space="preserve">
+    <value>Погоджено до публікації</value>
+  </data>
+  <data name="ReviewResult_Rework" xml:space="preserve">
+    <value>Передано на доопрацювання</value>
+  </data>
 </root>

@@ -1,129 +1,197 @@
-﻿//using Microsoft.AspNetCore.Authorization;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.EntityFrameworkCore;
-//using ScientificEdition.Data;
-//using ScientificEdition.Models;
-//using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ScientificEdition.Data;
+using ScientificEdition.Data.Entities;
+using ScientificEdition.Models.Review;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
 
-//namespace ScientificEdition.Controllers
-//{
-//    [Authorize(Roles = $"{UserRoles.Reviewer}, {UserRoles.Admin}")]
-//    public class ReviewController : Controller
-//    {
-//        private readonly ApplicationDbContext _context;
+namespace ScientificEdition.Controllers
+{
+    [Authorize(Roles = UserRoles.Reviewer)]
+    public class ReviewController : Controller
+    {
+        private readonly UserManager<User> userManager;
+        private readonly ApplicationDbContext dbContext;
 
-//        public ReviewController(ApplicationDbContext context)
-//        {
-//            _context = context;
-//        }
+        protected string UserId => userManager.GetUserId(User)!;
 
-//        public async Task<IActionResult> Index()
-//        {
-//            var reviews = await _context.Reviews.Include(r => r.Article).Include(r => r.Reviewer).ToListAsync();
-//            return View(reviews);
-//        }
+        public ReviewController(UserManager<User> userManager, ApplicationDbContext dbContext)
+        {
+            this.userManager = userManager;
+            this.dbContext = dbContext;
+        }
 
-//        public IActionResult Create()
-//        {
-//            var articles = _context.Articles.Where(a => a.Status == "Новий").ToList();
-//            ViewBag.Articles = articles;
-//            return View();
-//        }
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var assignedArticles = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Versions)
+                .ThenInclude(v => v.Reviews)
+                .Where(a => a.Reviewers.Any(r => r.Id == UserId))
+                .ToListAsync();
 
-//        // POST: Review/Create
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Create(ReviewViewModel model)
-//        {
-//            if (ModelState.IsValid)
-//            {
-//                var review = new Review
-//                {
-//                    ArticleId = model.ArticleId,
-//                    Content = model.Content,
-//                    ReviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier), // Отримуємо ID рецензента з контексту
-//                    ReviewDate = DateTime.Now
-//                };
+            return View(assignedArticles);
+        }
 
-//                _context.Add(review);
-//                await _context.SaveChangesAsync();
-//                return RedirectToAction(nameof(Index));
-//            }
-//            return View(model);
-//        }
+        [HttpGet]
+        public async Task<IActionResult> ArticleDetails(Guid id)
+        {
+            var article = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Versions)
+                .ThenInclude(v => v.Reviews)
+                .FirstOrDefaultAsync(a => a.Id == id && a.Reviewers.Any(r => r.Id == UserId));
 
-//        // GET: Review/Edit/5
-//        public async Task<IActionResult> Edit(int id)
-//        {
-//            var review = await _context.Reviews.FindAsync(id);
-//            if (review == null)
-//            {
-//                return NotFound();
-//            }
+            if (article == null)
+                return NotFound();
 
-//            var model = new ReviewViewModel
-//            {
-//                Id = review.Id,
-//                ArticleId = review.ArticleId,
-//                Content = review.Comment
-//            };
+            article.Versions = [.. article.Versions.OrderByDescending(v => v.UploadDate)];
 
-//            return View(model);
-//        }
+            return View(article);
+        }
 
-//        // POST: Review/Edit/5
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Edit(int id, ReviewViewModel model)
-//        {
-//            if (id != model.Id)
-//            {
-//                return NotFound();
-//            }
+        [HttpGet]
+        public IActionResult DownloadArticleVersion(Guid versionId)
+        {
+            var version = dbContext.ArticleVersions
+                .Include(v => v.Article)
+                .FirstOrDefault(v => v.Id == versionId && v.Article!.Reviewers.Any(r => r.Id == UserId));
 
-//            if (ModelState.IsValid)
-//            {
-//                var review = await _context.Reviews.FindAsync(id);
-//                if (review == null)
-//                {
-//                    return NotFound();
-//                }
+            if (version == null)
+                return NotFound();
 
-//                review.Comment = model.Content;
+            var filePath = version.FilePath;
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
 
-//                _context.Update(review);
-//                await _context.SaveChangesAsync();
-//                return RedirectToAction(nameof(Index));
-//            }
-//            return View(model);
-//        }
+            var articleVersionTitle = $"{version.Article!.Title}_v{version.VersionNumber}_{version.UploadDate:dd.MM.yyyy}";
+            var downloadFileName = $"{articleVersionTitle}{Path.GetExtension(filePath)}";
 
-//        // GET: Review/Delete/5
-//        [Authorize(Roles = UserRoles.Admin)]
-//        public async Task<IActionResult> Delete(int id)
-//        {
-//            var review = await _context.Reviews.Include(r => r.Article).Include(r => r.Reviewer).FirstOrDefaultAsync(m => m.Id == id);
-//            if (review == null)
-//            {
-//                return NotFound();
-//            }
+            return PhysicalFile(filePath, "application/octet-stream", downloadFileName);
+        }
 
-//            return View(review);
-//        }
+        [HttpGet]
+        public IActionResult CompareVersions(Guid articleId, int originalVersionId, int revisedVersionId)
+        {
+            if (originalVersionId == default && revisedVersionId == default)
+                return NotFound();
 
-//        // POST: Review/Delete/5
-//        [HttpPost, ActionName("Delete")]
-//        [ValidateAntiForgeryToken]
-//        [Authorize(Roles = UserRoles.Admin)]
-//        public async Task<IActionResult> DeleteConfirmed(int id)
-//        {
-//            var review = await _context.Reviews.FindAsync(id);
-//            if (review != null)
-//            {
-//                _context.Reviews.Remove(review);
-//                await _context.SaveChangesAsync();
-//            }
-//            return RedirectToAction(nameof(Index));
-//        }
-//    }
-//}
+            var article = dbContext.Articles
+                .Include(a => a.Versions)
+                .FirstOrDefault(a => a.Id == articleId && a.Reviewers.Any(r => r.Id == UserId));
+
+            if (article == null)
+                return NotFound();
+
+            var originalVersion = article.Versions.FirstOrDefault(v => v.VersionNumber == originalVersionId);
+            var revisedVersion = article.Versions.FirstOrDefault(v => v.VersionNumber == revisedVersionId);
+            if (originalVersion == null || revisedVersion == null)
+                return NotFound();
+
+            if (!System.IO.File.Exists(originalVersion.FilePath) || !System.IO.File.Exists(revisedVersion.FilePath))
+                return NotFound();
+
+            using (var originalDocumentStream = new FileStream(Path.GetFullPath(originalVersion.FilePath), FileMode.Open, FileAccess.Read))
+            using (var originalDocument = new WordDocument(originalDocumentStream, FormatType.Docx))
+            using (var revisedDocumentStream = new FileStream(Path.GetFullPath(revisedVersion.FilePath), FileMode.Open, FileAccess.Read))
+            using (var revisedDocument = new WordDocument(revisedDocumentStream, FormatType.Docx))
+            {
+                originalDocument.Compare(revisedDocument);
+
+                var stream = new MemoryStream();
+                originalDocument.Save(stream, FormatType.Docx);
+
+                stream.Position = 0;
+
+                return File(stream, "application/docx", $"{article.Title}_v{originalVersionId}-v{revisedVersionId}.docx");
+            }
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReviewVersion(Guid id)
+        {
+            var articleVersion = await GetArticleVersion(id);
+            if (articleVersion == null)
+                return NotFound();
+
+            if (articleVersion.Reviews.Any(r => r.ReviewerId == UserId))
+                return RedirectToAction(nameof(ArticleDetails), new { id = articleVersion.ArticleId });
+
+            var model = new ArticleVersionReviewModel
+            {
+                ArticleVersionId = articleVersion.Id,
+                ArticleVersion = articleVersion
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReviewVersion(ArticleVersionReviewModel model)
+        {
+            var articleVersion = await GetArticleVersion(model.ArticleVersionId);
+            if (articleVersion == null)
+                return NotFound();
+
+            if (articleVersion.Reviews.Any(r => r.ReviewerId == UserId))
+                return RedirectToAction(nameof(ArticleDetails), new { id = articleVersion.ArticleId });
+
+            if (!ModelState.IsValid)
+            {
+                model.ArticleVersion = articleVersion;
+                return View(model);
+            }
+
+            var review = new Review
+            {
+                ArticleVersionId = articleVersion.Id,
+                ReviewerId = UserId,
+                Comment = model.ReviewComment!,
+                Result = model.Result,
+                ReviewDate = DateTime.Now
+            };
+            articleVersion.Reviews.Add(review);
+
+            if (articleVersion.Reviews.Count >= 2)
+            {
+                var article = await dbContext.Articles.FirstOrDefaultAsync(a => a.Id == articleVersion.ArticleId);
+                if (article == null)
+                    return NotFound();
+
+                article.Status = DetermineNextArticleStatus(articleVersion);
+            }
+
+            await dbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(ArticleDetails), new { id = articleVersion.Article!.Id });
+        }
+
+        private async Task<ArticleVersion?> GetArticleVersion(Guid versionId)
+        {
+            return await dbContext.ArticleVersions
+                .Include(v => v.Article)
+                .Include(v => v.Article!.Category)
+                .Include(v => v.Article!.Reviewers)
+                .Include(a => a.Reviews)
+                .FirstOrDefaultAsync(v => v.Id == versionId
+                    && v.Article!.Reviewers.Any(r => r.Id == UserId));
+        }
+
+        private ArticleStatus DetermineNextArticleStatus(ArticleVersion version)
+        {
+            var reviews = version.Reviews.ToList();
+            if (reviews.Any(r => r.Result == ReviewResult.Rework))
+                return ArticleStatus.Rework;
+
+            if (reviews.All(r => r.Result == ReviewResult.Approved))
+                return ArticleStatus.Approved;
+
+            throw new NotSupportedException($"Article version '{version.Id}' has reviews with uknown result type.");
+        }
+    }
+}

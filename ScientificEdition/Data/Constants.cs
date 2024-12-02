@@ -16,4 +16,10 @@
         Published,
         Cancelled
     }
+
+    public enum ReviewResult
+    {
+        Approved = 1,
+        Rework = 2
+    }
 }

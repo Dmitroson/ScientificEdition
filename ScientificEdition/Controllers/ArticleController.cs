@@ -32,15 +32,17 @@ namespace ScientificEdition.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var userId = userManager.GetUserId(User);
 
-            var articles = dbContext.Articles
+            var articles = await dbContext.Articles
                 .Where(a => a.AuthorId.Equals(userId))
                 .Include(a => a.Author)
                 .Include(a => a.Category)
-                .ToList();
+                .Include(a => a.Versions)
+                .ThenInclude(v => v.Reviews)
+                .ToListAsync();
 
             return View(articles);
         }
@@ -49,7 +51,6 @@ namespace ScientificEdition.Controllers
         public IActionResult Details(Guid id)
         {
             var article = dbContext.Articles
-                .Include(a => a.Author)
                 .Include(a => a.Category)
                 .Include(a => a.Versions)
                 .FirstOrDefault(m => m.Id == id);
@@ -73,6 +74,7 @@ namespace ScientificEdition.Controllers
         {
             var version = dbContext.ArticleVersions
                 .Include(v => v.Article)
+                .Include(v => v.Reviews)
                 .FirstOrDefault(v => v.Id == id);
 
             if (version == null)
@@ -261,7 +263,6 @@ namespace ScientificEdition.Controllers
 
                 article.Title = model.Title;
                 article.Category = category;
-                //article.Status = model.Status;
 
                 dbContext.Update(article);
                 await dbContext.SaveChangesAsync();
@@ -272,7 +273,6 @@ namespace ScientificEdition.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = $"{UserRoles.Author}, {UserRoles.Admin}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var article = await dbContext.Articles.Include(a => a.Author).FirstOrDefaultAsync(m => m.Id == id);
@@ -284,7 +284,6 @@ namespace ScientificEdition.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = $"{UserRoles.Author}, {UserRoles.Admin}")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var article = await dbContext.Articles.FindAsync(id);

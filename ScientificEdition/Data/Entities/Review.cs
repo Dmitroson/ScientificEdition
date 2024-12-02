@@ -18,6 +18,9 @@ namespace ScientificEdition.Data.Entities
         public required string Comment { get; set; }
 
         [Required]
+        public required ReviewResult Result { get; set; }
+
+        [Required]
         public DateTime ReviewDate { get; set; }
 
         [Required]

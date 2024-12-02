@@ -15,5 +15,7 @@ namespace ScientificEdition.Data.Entities
         public ICollection<Article> Articles { get; set; } = [];
 
         public ICollection<Article> AssignedArticles { get; set; } = [];
+
+        public ICollection<Review> Reviews { get; set; } = [];
     }
 }

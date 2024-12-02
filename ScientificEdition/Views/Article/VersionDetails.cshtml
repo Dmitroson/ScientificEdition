@@ -3,17 +3,36 @@
 
 @{
     ViewData["Title"] = $"Версія №{Model.VersionNumber}";
+
+    var reviews = Model.Reviews.ToList();
 }
 
 <div class="container mt-5">
-    <h2>@Model.Article!.Title - Версія №@Model.VersionNumber</h2>
-    <p><strong>Дата завантаження:</strong> @Model.UploadDate.ToString("dd/MM/yyyy")</p>
+    <div>
+        <h2>@Model.Article!.Title - Версія №@Model.VersionNumber</h2>
+        <p><strong>Дата завантаження:</strong> @Model.UploadDate.ToString("dd/MM/yyyy")</p>
 
-    @if (!string.IsNullOrEmpty(Model.Comment))
+        @if (!string.IsNullOrEmpty(Model.Comment))
+        {
+                <p><strong>Коментар:</strong> @Html.Raw(Model.Comment)</p>
+        }
+
+        <a href="@Url.Action("DownloadVersion", "Article", new { versionId = Model.Id })" class="btn btn-success">Завантажити</a>
+        <a href="@Url.Action("Details", "Article", new { id = Model.Article.Id })" class="btn btn-secondary">Повернутись до версій</a>
+    </div>
+
+    @foreach (var review in reviews)
     {
-        <p><strong>Коментар:</strong> @Html.Raw(Model.Comment)</p>
-    }
+        var index = reviews.IndexOf(review) + 1;
+        var cardHeaderStyle = review.Result == ReviewResult.Approved ? "alert-success" : "alert-danger";
 
-    <a href="@Url.Action("DownloadVersion", "Article", new { versionId = Model.Id })" class="btn btn-success">Завантажити</a>
-    <a href="@Url.Action("Details", "Article", new { id = Model.Article.Id })" class="btn btn-secondary">Повернутись до статтей</a>
+            <div class="mt-3">
+                <div class="card card-header @cardHeaderStyle">
+                    <span>Відгук №@index - @TextHelper.Text($"ReviewResult_{review.Result}")</span>
+                </div>
+                <div class="card card-body">
+                @Html.Raw(review.Comment)
+                </div>
+            </div>
+    }
 </div>

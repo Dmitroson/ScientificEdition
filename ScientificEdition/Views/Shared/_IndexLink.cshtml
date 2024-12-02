@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using ScientificEdition.Business
+@using ScientificEdition.Data
+@using ScientificEdition.Data.Entities
+@inject UserManager<User> UserManager
+@inject ArticleManager ArticleManager
+
+@{
+    var userId = UserManager.GetUserId(User);
+}
+
+@if (User.IsInRole(UserRoles.Reviewer))
+{
+    var articlesToReview = await ArticleManager.CountArticlesToReview(userId!);
+
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Review" asp-action="Index">
+            Рецензування
+            @if (articlesToReview > 0)
+            {
+                <span class="badge bg-primary">@articlesToReview</span>
+            }
+        </a>
+    </li>
+}
+else
+{
+    var articlesToRework = await ArticleManager.CountArticlesToRework(userId!);
+
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Article" asp-action="Index">
+            Статті
+            @if (articlesToRework > 0)
+            {
+                <span class="badge bg-primary">@articlesToRework</span>
+            }
+        </a>
+    </li>
+}

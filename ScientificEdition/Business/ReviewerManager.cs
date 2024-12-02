@@ -1,20 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
-using ScientificEdition.Data.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Data;
-using Microsoft.EntityFrameworkCore;
+using ScientificEdition.Data.Entities;
 
 namespace ScientificEdition.Business
 {
     public class ReviewerManager
     {
-        private readonly UserManager<User> userManager;
         private readonly ApplicationDbContext dbContext;
 
-        public ReviewerManager(UserManager<User> userManager, ApplicationDbContext context)
-        {
-            this.userManager = userManager;
-            dbContext = context;
-        }
+        public ReviewerManager(ApplicationDbContext dbContext)
+            => this.dbContext = dbContext;
 
         public async Task<List<User>> GetAvailableReviewersForArticle(Guid articleId, int takeCount = 20)
         {
