@@ -182,7 +182,7 @@ namespace ScientificEdition.Controllers
                     && v.Article!.Reviewers.Any(r => r.Id == UserId));
         }
 
-        private ArticleStatus DetermineNextArticleStatus(ArticleVersion version)
+        private static ArticleStatus DetermineNextArticleStatus(ArticleVersion version)
         {
             var reviews = version.Reviews.ToList();
             if (reviews.Any(r => r.Result == ReviewResult.Rework))

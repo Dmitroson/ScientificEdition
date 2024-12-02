@@ -26,13 +26,13 @@
         var index = reviews.IndexOf(review) + 1;
         var cardHeaderStyle = review.Result == ReviewResult.Approved ? "alert-success" : "alert-danger";
 
-            <div class="mt-3">
-                <div class="card card-header @cardHeaderStyle">
-                    <span>Відгук №@index - @TextHelper.Text($"ReviewResult_{review.Result}")</span>
-                </div>
-                <div class="card card-body">
-                @Html.Raw(review.Comment)
-                </div>
+        <div class="mt-3">
+            <div class="card card-header @cardHeaderStyle">
+                <span>Відгук №@index - @TextHelper.Text($"ReviewResult_{review.Result}")</span>
             </div>
+            <div class="card card-body">
+                @Html.Raw(review.Comment)
+            </div>
+        </div>
     }
 </div>

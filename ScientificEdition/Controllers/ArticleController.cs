@@ -275,7 +275,11 @@ namespace ScientificEdition.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var article = await dbContext.Articles.Include(a => a.Author).FirstOrDefaultAsync(m => m.Id == id);
+            var article = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (article == null)
                 return NotFound();
 

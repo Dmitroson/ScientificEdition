@@ -17,6 +17,12 @@
             @Html.DisplayFor(model => model.Title)
         </dd>
         <dt class="col-sm-2">
+            Автор
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Author!.FullName)
+        </dd>
+        <dt class="col-sm-2">
             Категорія
         </dt>
         <dd class="col-sm-10">

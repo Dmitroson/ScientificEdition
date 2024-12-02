@@ -7,6 +7,7 @@ using ScientificEdition.Business;
 using ScientificEdition.Business.Constants;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
+using ScientificEdition.Utilities.Files;
 
 namespace ScientificEdition.Areas.Admin.Controllers
 {
@@ -15,15 +16,18 @@ namespace ScientificEdition.Areas.Admin.Controllers
     {
         private readonly UserManager<User> userManager;
         private readonly ArticleManager articleManager;
+        private readonly FileManager fileManager;
         private readonly ApplicationDbContext dbContext;
 
         public ArticlesController(
             UserManager<User> userManager,
             ArticleManager articleManager,
+            FileManager fileManager,
             ApplicationDbContext dbContext)
         {
             this.userManager = userManager;
             this.articleManager = articleManager;
+            this.fileManager = fileManager;
             this.dbContext = dbContext;
         }
 
@@ -241,6 +245,47 @@ namespace ScientificEdition.Areas.Admin.Controllers
             await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id = article.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var article = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (article == null)
+                return NotFound();
+
+            return View(article);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var article = await dbContext.Articles
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (article != null)
+            {
+                dbContext.Articles.Remove(article);
+                await dbContext.SaveChangesAsync();
+
+                var articleDirectoryPath = GetArticleDirectoryPath(article.Id, article.AuthorId);
+                fileManager.DeleteDirectory(articleDirectoryPath);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private static string[] GetArticleDirectoryPath(Guid articleId, string authorId)
+        {
+            if (articleId == Guid.Empty)
+                throw new ArgumentNullException(nameof(articleId));
+
+            return ["Documents", authorId, articleId.ToString()];
         }
     }
 }
