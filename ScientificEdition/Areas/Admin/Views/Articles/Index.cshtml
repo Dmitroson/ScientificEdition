@@ -85,7 +85,9 @@
             {
                 var author = article.Author!;
                 <tr>
-                    <td>@article.Title</td>
+                    <td>
+                        <a asp-controller="Articles" asp-action="Details" asp-route-id="@article.Id">@article.Title</a>
+                    </td>
                     <td>@article.Category!.Name</td>
                     <td>
                         <a asp-controller="Users" asp-action="Edit" asp-route-id="@author.Id">@author.FullName</a>
@@ -93,6 +95,10 @@
                     <td>@article.UploadDate.ToString("dd.MM.yyyy")</td>
                     <td>@TextHelper.Text($"ArticleStatus_{article.Status.ToString()}")</td>
                     <td class="text-center">
+                        @if (article.Status == ArticleStatus.Approved)
+                        {
+                            <a asp-controller="Articles" asp-action="Publish" asp-route-id="@article.Id" class="btn btn-primary btn-sm">Опублікувати</a>
+                        }
                         <a asp-controller="Articles" asp-action="Details" asp-route-id="@article.Id" class="btn btn-info btn-sm">Деталі</a>
                         <a asp-controller="Articles" asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger btn-sm">Видалити</a>
                     </td>

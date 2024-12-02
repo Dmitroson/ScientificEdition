@@ -101,6 +101,8 @@ namespace ScientificEdition.Areas.Admin.Controllers
         {
             var version = dbContext.ArticleVersions
                 .Include(v => v.Article)
+                .Include(v => v.Reviews)
+                .ThenInclude(r => r.Reviewer)
                 .FirstOrDefault(v => v.Id == id);
 
             if (version == null)
