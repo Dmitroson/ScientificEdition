@@ -49,24 +49,24 @@ namespace ScientificEdition.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = "Поле \"Ім'я\" обов'язкове.")]
             [MinLength(2, ErrorMessage = "Мінімальна довжина: {1} символи.")]
             [MaxLength(50, ErrorMessage = "Максимальна довжина: {1} символів.")]
             [Display(Name = "Ім'я")]
             public string FirstName { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Поле \"Прізвище\" обов'язкове.")]
             [MinLength(2, ErrorMessage = "Мінімальна довжина: {1} символи.")]
             [MaxLength(50, ErrorMessage = "Максимальна довжина: {1} символів.")]
             [Display(Name = "Прізвище")]
             public string LastName { get; set; }
 
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Поле \"E-mail\" обов'язкове.")]
+            [EmailAddress(ErrorMessage = "Неправильний формат електронної пошти.")]
             [Display(Name = "E-mail")]
             public string Email { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Поле \"Пароль\" обов'язкове.")]
             [MinLength(6, ErrorMessage = "Мінімальна довжина паролю {0} символів.")]
             [MaxLength(100, ErrorMessage = "Максимальна довжина паролю {0} символів.")]
             [DataType(DataType.Password)]
