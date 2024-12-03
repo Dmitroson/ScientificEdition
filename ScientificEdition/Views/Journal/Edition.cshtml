@@ -50,7 +50,7 @@
                     <td>@article.Title</td>
                     <td>@article.Author!.FullName</td>
                     <td class="text-center">
-                        <a asp-controller="Article" asp-action="Details" asp-route-id="@article.Id" class="btn btn-info btn-sm">Версії</a>
+                        <a asp-controller="Journal" asp-action="Article" asp-route-id="@article.Id" class="btn btn-info btn-sm">Відкрити</a>
                     </td>
                 </tr>
             }

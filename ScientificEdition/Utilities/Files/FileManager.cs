@@ -1,4 +1,6 @@
-﻿namespace ScientificEdition.Utilities.Files
+﻿using Syncfusion.Pdf;
+
+namespace ScientificEdition.Utilities.Files
 {
     public class FileManager
     {
@@ -9,7 +11,7 @@
         public FileManager(IWebHostEnvironment environment)
             => this.environment = environment;
 
-        public async Task<string> SaveFile(IFormFile sourceFile, string fileName, string[] destinationDirectory)
+        public async Task<string> SaveFileAsync(IFormFile sourceFile, string fileName, string[] destinationDirectory)
         {
             var fullDirectoryPath = GetFullPath(destinationDirectory);
 
@@ -20,6 +22,21 @@
             var fullFilePath = Path.Combine(fullDirectoryPath, $"{fileName}{Path.GetExtension(sourceFile.FileName)}");
             using (var stream = new FileStream(fullFilePath, FileMode.Create))
                 await sourceFile.CopyToAsync(stream);
+
+            return fullFilePath;
+        }
+
+        public string SavePdfFile(PdfDocument pdfFile, string fileName, string[] destinationDirectory)
+        {
+            var fullDirectoryPath = GetFullPath(destinationDirectory);
+
+            var directory = new DirectoryInfo(fullDirectoryPath);
+            if (!directory.Exists)
+                directory.Create();
+
+            var fullFilePath = Path.Combine(fullDirectoryPath, $"{fileName}.pdf");
+            using (var fileStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write))
+                pdfFile.Save(fileStream);
 
             return fullFilePath;
         }

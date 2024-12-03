@@ -142,6 +142,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
         {
             var journal = await dbContext.JournalEditions
                 .Include(j => j.Category)
+                .Include(j => j.Articles)
                 .FirstOrDefaultAsync(j => j.Id == model.JournalId && !j.Published);
 
             if (journal == null)
@@ -150,9 +151,12 @@ namespace ScientificEdition.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            if (model.Publish)
+            if (model.PublishNow || model.PublishDate.HasValue)
             {
-                journal.Published = model.Publish;
+                foreach (var article in journal.Articles)
+                    article.Status = ArticleStatus.Published;
+
+                journal.Published = true;
                 journal.PublishDate = model.PublishDate ?? DateTime.Now;
 
                 dbContext.JournalEditions.Update(journal);

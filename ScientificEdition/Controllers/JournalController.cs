@@ -1,17 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ScientificEdition.Business;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
 using ScientificEdition.Models.Journal;
+using ScientificEdition.Utilities.Files;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIORenderer;
+using System.Security.Authentication;
 
 namespace ScientificEdition.Controllers
 {
     public class JournalController : Controller
     {
+        private readonly ArticleManager articleManager;
         private readonly ApplicationDbContext dbContext;
+        private readonly FileManager fileManager;
 
-        public JournalController(ApplicationDbContext dbContext)
-            => this.dbContext = dbContext;
+        public JournalController(
+            ArticleManager articleManager,
+            ApplicationDbContext dbContext,
+            FileManager fileManager)
+        {
+            this.articleManager = articleManager;
+            this.dbContext = dbContext;
+            this.fileManager = fileManager;
+        }
 
         public async Task<IActionResult> Index(Guid categoryId)
         {
@@ -50,12 +65,60 @@ namespace ScientificEdition.Controllers
             return View(journal);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Article(Guid id)
         {
-            return View();
+            var article = await dbContext.Articles
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(a => a.Id == id && a.Status == ArticleStatus.Published);
+
+            if (article == null)
+                return NotFound();
+
+            var publishedVersion = articleManager.GetLastArticleVersion(id);
+            if (publishedVersion == null)
+                return NotFound();
+
+            var downloadFileName = $"{article.Title}_{article.Author!.FullName}.pdf";
+            var fileCheckResult = ArticlePdfFileAlreadyExists(article);
+            if (fileCheckResult.Exists)
+                return PhysicalFile(fileCheckResult.Path, "application/pdf", downloadFileName);
+
+            using (var docxStream = new FileStream(Path.GetFullPath(publishedVersion.FilePath), FileMode.Open, FileAccess.Read))
+            using (var wordDocument = new WordDocument(docxStream, FormatType.Docx))
+            using (var renderer = new DocIORenderer())
+            {
+                var pdfDocument = renderer.ConvertToPDF(wordDocument);
+
+                var fileName = $"{article.Id}";
+                var articleDirectoryPath = GetArticleDirectoryPath(article.AuthorId);
+
+                var fullFilePath = fileManager.SavePdfFile(pdfDocument, fileName, articleDirectoryPath);
+                if (string.IsNullOrEmpty(fullFilePath))
+                    return BadRequest();
+
+                return PhysicalFile(fullFilePath, "application/pdf", downloadFileName);
+            }
         }
 
         private static bool IsJournalVisible(JournalEdition journal)
             => journal.Published && journal.PublishDate <= DateTime.Now;
+
+        private (bool Exists, string Path) ArticlePdfFileAlreadyExists(Article article)
+        {
+            var fileNameWithExtension = $"{article.Id}.pdf";
+            var articleDirectoryPath = GetArticleDirectoryPath(article.AuthorId);
+
+            var fullFilePath = Path.Combine(fileManager.GetFullPath(articleDirectoryPath), fileNameWithExtension);
+            return (System.IO.File.Exists(fullFilePath), fullFilePath);
+        }
+
+        public string[] GetArticleDirectoryPath(string authorId)
+        {
+            if (string.IsNullOrEmpty(authorId))
+                throw new AuthenticationException();
+
+            return ["Documents", authorId];
+        }
     }
 }

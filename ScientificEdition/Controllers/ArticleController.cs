@@ -148,7 +148,7 @@ namespace ScientificEdition.Controllers
             dbContext.Articles.Add(article);
 
             var versionNumber = articleManager.GenerateNewArticleVersionNumber(article.Id);
-            var filePath = await fileManager.SaveFile(model.File, $"version_{versionNumber}", GetArticleDirectoryPath(article.Id));
+            var filePath = await fileManager.SaveFileAsync(model.File, $"version_{versionNumber}", GetArticleDirectoryPath(article.Id));
 
             var version = new ArticleVersion
             {
@@ -212,7 +212,7 @@ namespace ScientificEdition.Controllers
                 return BadRequest("Нова версія може бути завантажена тільки для статей у статусі 'На доопрацюванні'.");
 
             var versionNumber = articleManager.GenerateNewArticleVersionNumber(article.Id);
-            var filePath = await fileManager.SaveFile(model.File!, $"version_{versionNumber}", GetArticleDirectoryPath(article.Id));
+            var filePath = await fileManager.SaveFileAsync(model.File!, $"version_{versionNumber}", GetArticleDirectoryPath(article.Id));
 
             var version = new ArticleVersion
             {

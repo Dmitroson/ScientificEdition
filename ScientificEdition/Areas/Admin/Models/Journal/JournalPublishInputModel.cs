@@ -6,7 +6,7 @@ namespace ScientificEdition.Areas.Admin.Models.Journal
     {
         public Guid JournalId { get; set; }
 
-        public bool Publish { get; set; }
+        public bool PublishNow { get; set; }
 
         public DateTime? PublishDate { get; set; }
 

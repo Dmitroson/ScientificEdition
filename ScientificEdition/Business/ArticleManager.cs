@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
+using System.Security.Authentication;
 
 namespace ScientificEdition.Business
 {
@@ -18,6 +20,18 @@ namespace ScientificEdition.Business
                 .Include(a => a.Category)
                 .Include(a => a.Reviewers)
                 .FirstOrDefault(m => m.Id == articleId);
+        }
+
+        public ArticleVersion? GetLastArticleVersion(Guid articleId)
+        {
+            var article = dbContext.Articles
+                .Include(a => a.Versions)
+                .FirstOrDefault(a => a.Id == articleId);
+
+            if (article == null)
+                return null;
+
+            return article.Versions.MaxBy(v => v.VersionNumber);
         }
 
         public int GenerateNewArticleVersionNumber(Guid articleId)
