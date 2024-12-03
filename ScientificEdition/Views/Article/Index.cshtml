@@ -35,14 +35,24 @@
                         </div>
                         @if (lastVersion != null)
                         {
-                            <div class="text-primary d-flex align-items-center">
-                                <i class="bi bi-hourglass-split me-2" style="font-size: 1rem;"></i>
-                                <span>Відгуків: @lastVersion.Reviews.Count із 2</span>
-                            </div>
-                            @if(article.JournalEdition != null && article.Status == ArticleStatus.Published)
+                            @if (lastVersion.Reviews.Count >= 2)
+                            {
+                                <div class="text-success d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill me-2" style="font-size: 1rem;"></i>
+                                    <span>Перевірено</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-primary d-flex align-items-center">
+                                    <i class="bi bi-hourglass-split me-2" style="font-size: 1rem;"></i>
+                                    <span>Відгуків: @lastVersion.Reviews.Count із 2</span>
+                                </div>
+                            }
+                            @if (article.JournalEdition != null && article.Status == ArticleStatus.Published)
                             {
                                 <div>
-                                    <a href="@Url.Action("Edition", "Journals", new { id = article.JournalEditionId })">
+                                    <a href="@Url.Action("Edition", "Journal", new { id = article.JournalEditionId })">
                                         @article.JournalEdition!.Title
                                     </a>
                                 </div>

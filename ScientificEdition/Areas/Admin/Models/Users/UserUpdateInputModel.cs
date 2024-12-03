@@ -17,5 +17,7 @@ namespace ScientificEdition.Areas.Admin.Models.Users
 
         [Required]
         public string? Role { get; set; }
+
+        public List<Guid> CategoryIds { get; set; } = [];
     }
 }

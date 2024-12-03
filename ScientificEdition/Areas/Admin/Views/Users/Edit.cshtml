@@ -1,11 +1,20 @@
 ﻿@model UserUpdateInputModel
 @using ScientificEdition.Areas.Admin.Models.Users
+@using ScientificEdition.Business
 @using ScientificEdition.Data
 @using ScientificEdition.Data.Entities
+@inject CategoryManager CategoryManager
 
 @{
     ViewData["Title"] = "Редагувати користувача";
+
     var allRoles = RoleManager.Roles.ToList();
+    var categories = CategoryManager.GetAllCategories();
+    var categoryOptions = categories.Select(category => new SelectListItem
+            {
+                Text = category.Name,
+                Value = category.Id.ToString()
+            });
 }
 
 <div class="container col-9">
@@ -50,6 +59,16 @@
                 }
             </select>
         </div>
+
+        @if (Model.Role == UserRoles.Reviewer)
+        {
+            <div class="form-group">
+                <label asp-for="CategoryIds"><strong>Категорії:</strong></label>
+                <select asp-for="CategoryIds" asp-items="categoryOptions" multiple class="form-control">
+                </select>
+                <span asp-validation-for="CategoryIds" class="text-danger"></span>
+            </div>
+        }
 
         <button type="submit" class="btn btn-primary mt-3">Зберегти зміни</button>
         <a href="@Url.ActionLink("Index", "Users", new { role = Model.Role })" class="btn btn-secondary mt-3">Скасувати</a>

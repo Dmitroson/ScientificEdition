@@ -70,6 +70,7 @@ namespace ScientificEdition.Controllers
         {
             var article = await dbContext.Articles
                 .Include(a => a.Author)
+                .Include(a => a.JournalEdition)
                 .FirstOrDefaultAsync(a => a.Id == id && a.Status == ArticleStatus.Published);
 
             if (article == null)
@@ -79,7 +80,7 @@ namespace ScientificEdition.Controllers
             if (publishedVersion == null)
                 return NotFound();
 
-            var downloadFileName = $"{article.Title}_{article.Author!.FullName}.pdf";
+            var downloadFileName = $"{article.JournalEdition?.Title}_{article.Title}_{article.Author?.FullName}.pdf";
             var fileCheckResult = ArticlePdfFileAlreadyExists(article);
             if (fileCheckResult.Exists)
                 return PhysicalFile(fileCheckResult.Path, "application/pdf", downloadFileName);

@@ -1,5 +1,6 @@
 ﻿@model UsersListViewModel
 @using ScientificEdition.Areas.Admin.Models.Users
+@using ScientificEdition.Data
 
 @{
     var roleName = TextHelper.Text($"UserRole_{Model.Role}");
@@ -8,7 +9,7 @@
     ViewData["Title"] = usersListTitle;
 }
 
-<div class="container mt-5">
+<div class="container mt-3">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/Admin">Панель керування</a></li>
@@ -28,6 +29,10 @@
                     <tr>
                         <th scope="col">ПІБ</th>
                         <th scope="col">E-mail</th>
+                        @if (Model.Role == UserRoles.Reviewer)
+                        {
+                            <th scope="col">Категорії</th>
+                        }
                         <th scope="col"></th>
                     </tr>
                 </thead>
@@ -35,7 +40,7 @@
                     @if (!Model.Users.Any())
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-muted">Не знайдено користувачів.</td>
+                            <td colspan="4" class="text-center text-muted">Не знайдено користувачів.</td>
                         </tr>
                     }
                     else
@@ -45,6 +50,15 @@
                             <tr>
                                 <td>@user.FullName</td>
                                 <td>@user.Email</td>
+                                @if (Model.Role == UserRoles.Reviewer)
+                                {
+                                    <td>
+                                        @foreach (var category in user.Categories)
+                                        {
+                                            <div>@category.Name</div>
+                                        }
+                                    </td>
+                                }
                                 <td>
                                     <a href="/Admin/Users/Edit/@user.Id" class="btn btn-outline-warning btn-sm me-2" title="Edit User">
                                         <i class="bi bi-pencil-square"></i> Редагувати

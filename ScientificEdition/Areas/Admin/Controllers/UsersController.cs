@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Areas.Admin.Models.Users;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
@@ -34,6 +35,14 @@ namespace ScientificEdition.Areas.Admin.Controllers
                 return NotFound($"Role '{role}' does not exist.");
 
             var users = await userManager.GetUsersInRoleAsync(role);
+
+            if (role == UserRoles.Reviewer)
+            {
+                var allCategories = await dbContext.Categories.Include(c => c.Users).ToListAsync();
+                foreach (var user in users)
+                    user.Categories = allCategories.Where(c => c.Users.Any(u => u.Id == user.Id)).ToList();
+            }
+
             var model = new UsersListViewModel
             {
                 Role = role,
@@ -46,7 +55,10 @@ namespace ScientificEdition.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            var user = await userManager.FindByIdAsync(id);
+            var user = await dbContext.Users
+                .Include(u => u.Categories)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
             if (user == null)
                 return NotFound();
 
@@ -57,7 +69,8 @@ namespace ScientificEdition.Areas.Admin.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email!,
-                Role = role
+                Role = role,
+                CategoryIds = role == UserRoles.Reviewer ? user.Categories.Select(c => c.Id).ToList() : []
             };
             return View(model);
         }
@@ -69,7 +82,10 @@ namespace ScientificEdition.Areas.Admin.Controllers
             if (id != model.Id)
                 return NotFound();
 
-            var user = await userManager.FindByIdAsync(id);
+            var user = await dbContext.Users
+                .Include(u => u.Categories)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
             if (user == null)
                 return NotFound();
 
@@ -78,16 +94,25 @@ namespace ScientificEdition.Areas.Admin.Controllers
             user.UserName = model.Email;
             user.Email = model.Email;
 
-            var role = await GetUserRoleName(user);
-
             var result = await userManager.UpdateAsync(user);
             if (result.Succeeded)
             {
+                var role = await GetUserRoleName(user);
                 if (model.Role != role)
                 {
                     var userRoles = await userManager.GetRolesAsync(user);
                     await userManager.RemoveFromRolesAsync(user, userRoles);
                     await userManager.AddToRoleAsync(user, model.Role!);
+                }
+
+                if (role == UserRoles.Reviewer)
+                {
+                    user.Categories.Clear();
+
+                    var categories = await dbContext.Categories.Where(c => model.CategoryIds.Contains(c.Id)).ToListAsync();
+                    user.Categories = categories;
+
+                    await dbContext.SaveChangesAsync();
                 }
 
                 return RedirectToAction(nameof(Index), new { role = model.Role });
