@@ -82,6 +82,12 @@ namespace ScientificEdition.Areas.Admin.Controllers
             if (id != model.Id)
                 return NotFound();
 
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (model.Role == UserRoles.Reviewer && model.CategoryIds.Count == 0)
+                return View(model);
+
             var user = await dbContext.Users
                 .Include(u => u.Categories)
                 .FirstOrDefaultAsync(u => u.Id == id);
@@ -105,7 +111,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
                     await userManager.AddToRoleAsync(user, model.Role!);
                 }
 
-                if (role == UserRoles.Reviewer)
+                if (model.Role == UserRoles.Reviewer)
                 {
                     user.Categories.Clear();
 
