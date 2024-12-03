@@ -38,6 +38,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
             var articlesQuery = dbContext.Articles
                 .Include(a => a.Author)
                 .Include(a => a.Category)
+                .Include(a => a.JournalEdition)
                 .AsQueryable();
 
             query = query?.Trim();
@@ -278,6 +279,54 @@ namespace ScientificEdition.Areas.Admin.Controllers
                 var articleDirectoryPath = GetArticleDirectoryPath(article.Id, article.AuthorId);
                 fileManager.DeleteDirectory(articleDirectoryPath);
             }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddToJournal(Guid articleId)
+        {
+            var article = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(a => a.Id == articleId && a.Status == ArticleStatus.Approved);
+
+            if (article == null)
+                return NotFound();
+
+            var model = new AddArticleToJournalInputModel
+            {
+                ArticleId = article.Id,
+                Article = article
+            };
+            return PartialView("_AddToJournal", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToJournal(AddArticleToJournalInputModel model)
+        {
+            var article = await dbContext.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .FirstOrDefaultAsync(a => a.Id == model.ArticleId && a.Status == ArticleStatus.Approved);
+
+            if (article == null)
+                return NotFound();
+
+            var journal = await dbContext.JournalEditions
+                .Include(a => a.Articles)
+                .FirstOrDefaultAsync(j => j.Id == model.JournalId && !j.Published);
+
+            if (journal == null)
+            {
+                model.Article = article;
+                return PartialView("_AddToJournal", model);
+            }
+
+            article.Status = ArticleStatus.Scheduled;
+            journal.Articles.Add(article);
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }

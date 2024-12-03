@@ -42,6 +42,7 @@ namespace ScientificEdition.Controllers
                 .Include(a => a.Category)
                 .Include(a => a.Versions)
                 .ThenInclude(v => v.Reviews)
+                .Include(a => a.JournalEdition)
                 .ToListAsync();
 
             return View(articles);

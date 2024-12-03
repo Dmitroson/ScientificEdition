@@ -156,4 +156,7 @@
   <data name="ReviewResult_Rework" xml:space="preserve">
     <value>Передано на доопрацювання</value>
   </data>
+  <data name="ArticleStatus_Scheduled" xml:space="preserve">
+    <value>Публікація запланована</value>
+  </data>
 </root>

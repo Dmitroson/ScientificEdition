@@ -13,6 +13,7 @@
         Review,
         Rework,
         Approved,
+        Scheduled,
         Published,
         Cancelled
     }

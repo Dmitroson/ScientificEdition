@@ -58,6 +58,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddScoped<ArticleManager>();
     services.AddScoped<CategoryManager>();
     services.AddScoped<ReviewerManager>();
+    services.AddScoped<JournalManager>();
 }
 
 static void RegisterRoutes(WebApplication app)

@@ -1,0 +1,40 @@
+﻿@using ScientificEdition.Areas.Admin.Models.Article
+@using ScientificEdition.Business
+@model AddArticleToJournalInputModel
+@inject CategoryManager CategoryManager
+@inject JournalManager JournalManager
+
+@{
+    var article = Model.Article;
+
+    var applicableJournals = await JournalManager.GetJournalsAsync(article.CategoryId);
+    var journalOptions = applicableJournals.Select(journal =>
+    {
+        var isArticleAlreadyIncluded = journal.Articles.Any(a => a.Id == article.Id);
+        return new SelectListItem
+                {
+                    Text = isArticleAlreadyIncluded ? $"{journal.Title} - вже включено до видання" : journal.Title,
+                    Value = journal.Id.ToString(),
+                    Disabled = isArticleAlreadyIncluded
+                };
+    });
+}
+
+<div>
+    <h5>@article.Title</h5>
+    <p>Категорія: @article.Category!.Name</p>
+    <p>Автор: @article.Author!.FullName</p>
+    <p>Дата завантаження: @article.UploadDate.ToString("dd.MM.yyyy")</p>
+
+    <form method="post" asp-action="AddToJournal">
+        <input hidden asp-for="ArticleId" />
+
+        <div class="form-group mb-3">
+            <label asp-for="JournalId" class="form-label">Видання</label>
+            @Html.DropDownListFor(m => m.JournalId, journalOptions, "Оберіть видання...", new { @class = "form-select" })
+            <span asp-validation-for="JournalId"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Додати до видання</button>
+    </form>
+</div>

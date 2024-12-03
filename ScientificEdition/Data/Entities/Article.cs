@@ -34,5 +34,10 @@ namespace ScientificEdition.Data.Entities
         public ICollection<User> Reviewers { get; set; } = [];
 
         public ICollection<ArticleVersion> Versions { get; set; } = [];
+
+        public Guid? JournalEditionId { get; set; }
+
+        [ForeignKey(nameof(JournalEditionId))]
+        public JournalEdition? JournalEdition { get; set; }
     }
 }

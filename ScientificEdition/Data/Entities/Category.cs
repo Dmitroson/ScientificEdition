@@ -13,5 +13,7 @@ namespace ScientificEdition.Data.Entities
         public ICollection<Article> Articles { get; set; } = [];
 
         public ICollection<User> Users { get; set; } = [];
+
+        public ICollection<JournalEdition> Journals { get; set; } = [];
     }
 }

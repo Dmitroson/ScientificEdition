@@ -1,0 +1,45 @@
+﻿@using ScientificEdition.Business
+@model ScientificEdition.Areas.Admin.Models.Journal.JournalInputModel
+@inject CategoryManager CategoryManager
+
+@{
+    ViewData["Title"] = "Нове видання";
+
+    var categories = CategoryManager.GetAllCategories();
+    var categoryOptions = categories.Select(category => new SelectListItem
+            {
+                Text = category.Name,
+                Value = category.Id.ToString()
+            });
+}
+
+<div class="container mt-5 col-lg-9">
+    <h2>Нове видання</h2>
+
+    <form asp-action="Create" method="post">
+        <div class="mb-3">
+            <label asp-for="CategoryId" class="form-label">Категорія</label>
+            @Html.DropDownListFor(m => m.CategoryId, categoryOptions, "Оберіть категорію...", new { @class = "form-select" })
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Назва</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Опис</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Зберегти</button>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Journals")">Скасувати</a>
+        </div>
+    </form>
+
+    <a class="btn btn-link" href="@Url.Action("Index", "Journals")">Повернутись до списку</a>
+</div>

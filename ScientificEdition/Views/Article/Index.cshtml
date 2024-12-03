@@ -39,16 +39,23 @@
                                 <i class="bi bi-hourglass-split me-2" style="font-size: 1rem;"></i>
                                 <span>Відгуків: @lastVersion.Reviews.Count із 2</span>
                             </div>
+                            @if(article.JournalEdition != null && article.Status == ArticleStatus.Published)
+                            {
+                                <div>
+                                    <a href="@Url.Action("Edition", "Journals", new { id = article.JournalEditionId })">
+                                        @article.JournalEdition!.Title
+                                    </a>
+                                </div>
+                            }
                         }
-
                     </td>
                     <td class="text-center">
                         <a asp-controller="Article" asp-action="Details" asp-route-id="@article.Id" class="btn btn-info btn-sm">Версії</a>
                         @if (article.Status == ArticleStatus.New)
                         {
                             <a asp-controller="Article" asp-action="Edit" asp-route-id="@article.Id" class="btn btn-info btn-sm">Редагувати</a>
+                            <a asp-controller="Article" asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger btn-sm">Видалити</a>
                         }
-                        <a asp-controller="Article" asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger btn-sm">Видалити</a>
                     </td>
                 </tr>
             }

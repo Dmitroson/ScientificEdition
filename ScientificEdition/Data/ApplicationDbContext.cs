@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Data.Entities;
-using System.Reflection.Emit;
 
 namespace ScientificEdition.Data
 {
@@ -11,6 +10,7 @@ namespace ScientificEdition.Data
         public DbSet<ArticleVersion> ArticleVersions { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<JournalEdition> JournalEditions { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
@@ -62,6 +62,18 @@ namespace ScientificEdition.Data
                 .HasMany(a => a.Reviewers)
                 .WithMany(u => u.AssignedArticles)
                 .UsingEntity(j => j.ToTable("ArticleReviewers"));
+
+            builder.Entity<Article>()
+                .HasOne(a => a.JournalEdition)
+                .WithMany(je => je.Articles)
+                .HasForeignKey(a => a.JournalEditionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Category>()
+                .HasMany(c => c.Journals)
+                .WithOne(j => j.Category)
+                .HasForeignKey(j => j.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
