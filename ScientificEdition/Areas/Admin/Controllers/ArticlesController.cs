@@ -220,6 +220,7 @@ namespace ScientificEdition.Areas.Admin.Controllers
             if (model.ReviewerIds.Count > 2)
             {
                 ModelState.AddModelError(nameof(ReviewersAssignmentModel.ReviewerIds), "Потрібно обрати 2 рецензенти.");
+                model.Article = article;
                 return View(model);
             }
 
