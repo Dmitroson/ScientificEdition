@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ScientificEdition.Data;
 using ScientificEdition.Data.Entities;
 
@@ -6,10 +7,14 @@ namespace ScientificEdition.Business
 {
     public class ReviewerManager
     {
+        private readonly UserManager<User> userManager;
         private readonly ApplicationDbContext dbContext;
 
-        public ReviewerManager(ApplicationDbContext dbContext)
-            => this.dbContext = dbContext;
+        public ReviewerManager(UserManager<User> userManager, ApplicationDbContext dbContext)
+        {
+            this.userManager = userManager;
+            this.dbContext = dbContext;
+        }
 
         public async Task<List<User>> GetAvailableReviewersForArticle(Guid articleId, int takeCount = 20)
         {
@@ -30,7 +35,8 @@ namespace ScientificEdition.Business
                         (userRole, role) => role)
                     .Any(role => role.Name == UserRoles.Reviewer) &&
                     user.Categories.Any(category => category.Id == article.CategoryId))
-                .OrderBy(u => u.AssignedArticles.Count)
+                .Include(u => u.AssignedArticles)
+                .OrderBy(u => u.AssignedArticles.Count(a => a.Status == ArticleStatus.Review))
                 .Take(takeCount)
                 .ToListAsync();
 

@@ -11,7 +11,7 @@
     var availableReviewers = await ReviewerManager.GetAvailableReviewersForArticle(Model.ArticleId);
     var availableReviewerOptions = availableReviewers.Select(r => new SelectListItem
             {
-                Text = $"{r.FullName} (Статей у роботі: {r.AssignedArticles.Count})",
+                Text = $"{r.FullName} (Статей у роботі: {r.AssignedArticles.Count(a => a.Status == ArticleStatus.Review)})",
                 Value = r.Id
             });
 }

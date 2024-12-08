@@ -51,10 +51,19 @@ namespace ScientificEdition.Business
 
         public async Task<int> CountArticlesToReview(string userId)
         {
-            return await dbContext.Articles
-                .CountAsync(a => a.Status == ArticleStatus.Review
-                    && a.Reviewers.Any(reviewer => reviewer.Id == userId
-                        && !reviewer.Reviews.Any(review => review.ArticleVersion!.ArticleId == a.Id)));
+            var reviewer = await dbContext.Users
+                .Include(u => u.Reviews)
+                .Include(u => u.AssignedArticles)
+                .ThenInclude(a => a.Versions)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (reviewer == null)
+                return 0;
+
+            return await dbContext.ArticleVersions
+                .CountAsync(v => v.Article!.Status == ArticleStatus.Review
+                    && v.Article!.Reviewers.Any(r => r.Id == userId)
+                    && !v.Reviews.Any(r => r.ReviewerId == userId));
         }
     }
 }
